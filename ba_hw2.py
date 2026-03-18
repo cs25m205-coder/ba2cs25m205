@@ -149,13 +149,29 @@ def ucb1(bandit, T):
 
 # Thompson Sampling
 def thompson_sampling(bandit, T):
-
+    K = bandit.K
+    alpha = np.ones(K)
+    beta = np.ones(K)
     #Initialize algorithm dependent variable here
     rewards, regrets = [], []
     cumulative_regret = 0
 
     for t in range(T):
+        samples = np.random.beta(alpha, beta)
+        arm = np.argmax(samples)
 
+        reward = bandit.pull(arm)
+
+        if reward == 1:
+            alpha[arm] += 1
+        else:
+            beta[arm] += 1
+
+        rewards.append(reward)
+
+        regret = bandit.best_mean - bandit.means[arm]
+        cumulative_regret += regret
+        regrets.append(cumulative_regret)
     return np.array(rewards), np.array(regrets)
 
 # ──────────────────────────────────────────────
@@ -167,7 +183,7 @@ def run_experiment(means, T, n_runs):
         "Greedy":            greedy,
         "Eps-Greedy(0.1)":   lambda b, T: epsilon_greedy(b, T, epsilon=0.1),
         "UCB1":              ucb1,
-        "KL-UCB":            kl_ucb,
+        # "KL-UCB":            kl_ucb,
         "Thompson Sampling": thompson_sampling,
     }
     results = {name: [] for name in algorithms}
