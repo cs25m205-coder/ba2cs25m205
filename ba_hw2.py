@@ -45,13 +45,36 @@ def greedy(bandit, T):
     Pulls each arm once to initialise, then always picks argmax(mean)."""
     K = bandit.K
     #Initialize algorithm dependent variable here
+    no_of_pulls = np.zeros(K)
+    emp_mean = np.zeros(K)
     rewards, regrets = [], []
     cumulative_regret = 0
 
     # Initialise: pull each arm once
     for arm in range(K):
+        reward = bandit.pull(arm)
+
+        no_of_pulls[arm] += 1
+        emp_mean[arm] = reward
+
+        rewards.append(reward)
+
+        regret = bandit.best_mean - bandit.means[arm]
+        cumulative_regret += regret
+        regrets.append(cumulative_regret)
 
     for t in range(K, T):
+        arm = np.argmax(emp_mean)
+        reward = bandit.pull(arm)
+
+        no_of_pulls[arm] += 1
+        emp_mean[arm] += (reward - emp_mean[arm]) / no_of_pulls[arm]
+
+        rewards.append(reward)
+
+        regret = bandit.best_mean - bandit.means[arm]
+        cumulative_regret += regret
+        regrets.append(cumulative_regret)
 
     return np.array(rewards), np.array(regrets)
 
