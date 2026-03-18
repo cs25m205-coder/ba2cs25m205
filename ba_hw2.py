@@ -198,7 +198,20 @@ def run_experiment(means, T, n_runs):
     avg_regrets = {name: np.mean(runs, axis=0) for name, runs in results.items()}
 
     # ── Plot 1: Cumulative Regret Line Chart ──
+    plt.clf()
+    for name, regret in avg_regrets.items():
+        plt.plot(regret, label=name)
 
+    plt.title("Cumulative Regret vs Time")
+    plt.xlabel("Time Steps")
+    plt.ylabel("Cumulative Regret")
+
+    plot1 = plt.build()
+
+    with open("plot1.txt", "w", encoding="utf-8") as f:
+        f.write(plot1)
+
+    plt.show()
     # ── Plot 2: Final Average Regret Bar Chart ──
 
 
@@ -207,4 +220,4 @@ if __name__ == "__main__":
     MEANS = [0.1, 0.3, 0.5, 0.6, 0.9]   # 5-armed bandit, best arm = 0.9
     T     = 10000
     RUNS  = 50
-    run_experiment(MEANS, T, n_RUNS)
+    run_experiment(MEANS, T, RUNS)
