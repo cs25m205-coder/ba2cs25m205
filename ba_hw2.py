@@ -117,15 +117,32 @@ def epsilon_greedy(bandit, T, epsilon=0.1):
 
 # UCB1
 def ucb1(bandit, T):
-    K = bandit.K
+    K = bandit.K 
     #Initialize algorithm dependent variable here
+    no_of_pulls = np.zeros(K)
+    emp_mean = np.zeros(K)
     rewards, regrets = [], []
     cumulative_regret = 0
 
-    # Pull each arm once
+    # Initialise: pull each arm once
     for arm in range(K):
-
+        reward = bandit.pull(arm)
+        no_of_pulls[arm] += 1
+        emp_mean[arm] = reward
+        rewards.append(reward)
+        regret = bandit.best_mean - bandit.means[arm]
+        cumulative_regret += regret
+        regrets.append(cumulative_regret)
     for t in range(K, T):
+        ucb_values = emp_mean + np.sqrt((2 * np.log(t)) / no_of_pulls)
+        arm = np.argmax(ucb_values)
+        reward = bandit.pull(arm)
+        no_of_pulls[arm] += 1
+        emp_mean[arm] += (reward - emp_mean[arm]) / no_of_pulls[arm]
+        rewards.append(reward)
+        regret = bandit.best_mean - bandit.means[arm]
+        cumulative_regret += regret
+        regrets.append(cumulative_regret)
 
     return np.array(rewards), np.array(regrets)
 
